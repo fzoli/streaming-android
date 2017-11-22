@@ -1,1 +1,1 @@
-include ':libStreaming', ':app'
+include ':libStreaming', ':app', ':ijkplayer'

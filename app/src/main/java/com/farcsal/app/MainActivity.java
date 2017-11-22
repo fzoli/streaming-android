@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .setTimeToLive(200)
                 .setCallback(this)
                 .setSurfaceView(mSurfaceView)
-                .setPreviewOrientation(90)
+                .setPreviewOrientation(0)
                 .setContext(getApplicationContext())
                 .setAudioEncoder(SessionBuilder.AUDIO_AAC)
                 .setAudioQuality(new AudioQuality(16000, 32000))
@@ -127,6 +127,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Log.d(TAG,"Session started.");
         mButton1.setEnabled(true);
         mButton1.setText("stop");
+        // FIXME: temp "bugfix" to resolve video stream error
+        mSession.switchCamera();
+        mSession.switchCamera();
     }
 
     @Override

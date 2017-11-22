@@ -18,25 +18,28 @@
 
 package net.majorkernelpanic.streaming.video;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import android.annotation.SuppressLint;
+import android.content.SharedPreferences.Editor;
+import android.graphics.ImageFormat;
+import android.hardware.Camera.CameraInfo;
+import android.media.MediaRecorder;
+import android.os.Build;
+import android.os.Environment;
+import android.service.textservice.SpellCheckerService.Session;
+import android.util.Base64;
+import android.util.Log;
+
 import net.majorkernelpanic.streaming.SessionBuilder;
 import net.majorkernelpanic.streaming.exceptions.ConfNotSupportedException;
 import net.majorkernelpanic.streaming.exceptions.StorageUnavailableException;
 import net.majorkernelpanic.streaming.hw.EncoderDebugger;
 import net.majorkernelpanic.streaming.mp4.MP4Config;
 import net.majorkernelpanic.streaming.rtp.H264Packetizer;
-import android.annotation.SuppressLint;
-import android.content.SharedPreferences.Editor;
-import android.graphics.ImageFormat;
-import android.hardware.Camera.CameraInfo;
-import android.media.MediaRecorder;
-import android.os.Environment;
-import android.service.textservice.SpellCheckerService.Session;
-import android.util.Base64;
-import android.util.Log;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A class for streaming H.264 from the camera of an android device using RTP.
@@ -122,9 +125,13 @@ public class H264Stream extends VideoStream {
 		createCamera();
 		updateCamera();
 		try {
-			if (mQuality.resX>=640) {
-				// Using the MediaCodec API with the buffer method for high resolutions is too slow
-				mMode = MODE_MEDIARECORDER_API;
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+				if (mQuality.resX >= 640) {
+					// Using the MediaCodec API with the buffer method for high resolutions is too slow
+					mMode = MODE_MEDIARECORDER_API;
+				}
+			} else {
+				// After Lollipop only MEDIACODEC is available.
 			}
 			EncoderDebugger debugger = EncoderDebugger.debug(mSettings, mQuality.resX, mQuality.resY);
 			return new MP4Config(debugger.getB64SPS(), debugger.getB64PPS());
@@ -149,7 +156,7 @@ public class H264Stream extends VideoStream {
 			throw new StorageUnavailableException("No external storage or external storage not ready !");
 		}
 
-		final String TESTFILE = Environment.getExternalStorageDirectory().getPath()+"/spydroid-test.mp4";
+		final String TESTFILE = Environment.getExternalStorageDirectory().getPath()+"/libstreaming-test.mp4";
 		
 		Log.i(TAG,"Testing H264 support... Test file saved at: "+TESTFILE);
 
